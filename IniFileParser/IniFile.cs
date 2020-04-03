@@ -35,10 +35,56 @@ namespace IniFileParser
 
         public void Parse()
         {
+            Section section = new Section("");
+            List<string> sectionValue = new List<string>();
+            string sectionData = "";
+            string sectionKey = "";
+
             List<string> lines = File.ReadAllLines(Path).ToList();
             foreach (var line in lines)
             {
+                if ((line.TrimStart().TrimEnd().StartsWith("#")) || (line.Trim() == ""))
+                {
+                    //do nothing
+                }
+                else
+                {
+                    if (line.StartsWith("[") || line.EndsWith("]"))
+                    {
+                        //put section here
+                        sectionData = line.Substring(0, line.Length);
+                        section = new Section(sectionData);
+                    }
+                    else
+                    {
+                        //key values
+                        string[] keyValue = null;
+                        keyValue = line.Split(new char[] { '=' }, 2);
 
+                        if (sectionData == null)
+                        {
+                            sectionData = "ROOT";
+                        }
+                        sectionKey = keyValue[0];
+                        sectionValue.Add(keyValue[1]);
+
+                        if (!section.KeyValuePairs.ContainsKey(sectionKey))
+                        {
+                            sectionValue.Clear();
+                            sectionValue.Add(keyValue[1]);
+                            section.KeyValuePairs.Add(sectionKey, sectionValue.ToList());
+                        }
+                        else
+                        {
+                            section.KeyValuePairs.Remove(sectionKey);
+                            section.KeyValuePairs.Add(sectionKey, sectionValue.ToList());
+                        }
+                    }
+                }
+                if (!this.Sections.Contains(section))
+                {
+                    this.Sections.Add(section);
+                }
             }
 
         }
